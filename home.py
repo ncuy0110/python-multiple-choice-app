@@ -12,7 +12,7 @@ large_font = ("Verdana", 35)
 
 student = Student()
 
-with open('../data.json', 'r') as openfile:
+with open('data.json', 'r') as openfile:
     data = json.load(openfile)
 
 # create list question from file
@@ -49,13 +49,23 @@ class StartPage(tk.Frame):
         label = ttk.Label(self, text="Welcome!", font=large_font)
         label.place(x=130, y=40)
 
+        lbl_ID = ttk.Label(self, text="ID", font=('Arial', 20))
+        lbl_ID.place(x=100, y=150)
+
+        ID = tk.Text(self, width=20, height=2)
+        ID.place(x=170, y=150)
+
+        lbl_name = ttk.Label(self, text="Name", font=('Arial', 20))
+        lbl_name.place(x=100, y=200)
+
         name = tk.Text(self, width=20, height=2)
         name.place(x=170, y=200)
 
         def next_page1():
-            if name.get("1.0", "end-1c") == "":
-                messagebox.showerror("Name", "Name is empty!")
+            if name.get("1.0", "end-1c") == "" or ID.get("1.0", "end-1c") == "":
+                messagebox.showerror("Invalid", "ID/Name is empty!")
             else:
+                student.set_ID(ID.get("1.0", "end-1c"))
                 student.set_name(name.get("1.0", "end-1c"))
                 controller.show_frame(Page1)
 
@@ -80,7 +90,7 @@ class Page1(tk.Frame):
                 time.sleep(1)
             controller.show_frame(Page2)
 
-        thread_countdown = threading.Thread(target=countdown, args=(10,))
+        thread_countdown = threading.Thread(target=countdown, args=(10 * 60,))
         thread_countdown.daemon = True
         thread_countdown.start()
 
@@ -152,6 +162,9 @@ class Page2(tk.Frame):
             if student.selection[i] == qts.answers[i]:
                 scores += 1
 
+        lbl_ID = ttk.Label(self, text=f"ID: {student.ID}", font=("Arial", 20))
+        lbl_ID.place(x=100, y=50)
+
         lbl_name = ttk.Label(self, text=f"Name: {student.name}", font=("Arial", 20))
         lbl_name.place(x=100, y=100)
 
@@ -162,8 +175,11 @@ class Page2(tk.Frame):
         lbl_quest.place(x=100, y=200)
 
         def save_to_file():
-            user_info = {'name': student.name,
-                         'scores': scores}
+            user_info = {
+                'ID': student.ID,
+                'name': student.name,
+                'scores': scores
+            }
             json_object = json.dumps(user_info, indent=2)
 
             with open("user.json", "w") as outfile:
